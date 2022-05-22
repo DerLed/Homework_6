@@ -4,17 +4,13 @@ import com.lebedev.entity.MovieEntity;
 import com.lebedev.entity.PlaceEntity;
 import com.lebedev.entity.TicketEntity;
 import com.lebedev.entity.UserEntity;
+import com.lebedev.helper.Property;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 public class UserDaoImpl implements UserDao {
-
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/hmwk6";
 
     private static final String SELECT_ALL = "SELECT * FROM usr";
     private static final String SELECT_TICKETS = "SELECT t.cost, " +
@@ -43,6 +39,7 @@ public class UserDaoImpl implements UserDao {
     private static final String DELETE = "DELETE FROM usr WHERE id = ?";
     private static final String ADD_TICKET_TO_USER = "INSERT INTO user_ticket (user_id, ticket_id) VALUES(?, ?);";
 
+    Properties properties = Property.getProperty().getProperties();
     private static UserDaoImpl instance;
 
     private UserDaoImpl() {
@@ -171,7 +168,8 @@ public class UserDaoImpl implements UserDao {
     }
 
     public void addTicketToUser(UserEntity user, TicketEntity ticket) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
+        try (Connection conn = DriverManager.getConnection(properties.getProperty("DB_URL"),
+                properties.getProperty("DB_USER"), properties.getProperty("DB_PASSWORD"))) {
             conn.setAutoCommit(false);
             PreparedStatement psa = conn.prepareStatement(ADD_TICKET_TO_USER, Statement.RETURN_GENERATED_KEYS);
             psa.setLong(1, user.getId());
@@ -213,7 +211,8 @@ public class UserDaoImpl implements UserDao {
 
 
     private <T> T query(Function<Connection, T> s) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
+        try (Connection conn = DriverManager.getConnection(properties.getProperty("DB_URL"),
+                properties.getProperty("DB_USER"), properties.getProperty("DB_PASSWORD"))) {
             return s.apply(conn);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
