@@ -1,33 +1,34 @@
 package com.lebedev;
 
-import com.lebedev.dao.UserDao;
+import com.lebedev.dao.UserDaoImpl;
 import com.lebedev.entity.UserEntity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
-        UserDao ud = new UserDao();
+        UserDaoImpl ud = UserDaoImpl.getInstance();
+
+        //save
         UserEntity user3 = new UserEntity("Василий", "888@mail.ru");
         ud.saveUser(user3);
+
+        //find one
         UserEntity user2 = ud.findUserByName("Антон").get();
-        ud.deleteUser(user2);
-        List<UserEntity> users = ud.findAllUser();
-
-        for (UserEntity u: users){
-            System.out.println(u);
-        }
-
-
         UserEntity user1 = ud.findUserById(4L).get();
 
-        System.out.println(user1);
+        //update
+        user1.setName("Дмитрий");
+        ud.updateUser(user1);
 
+        //delete
+        ud.deleteUser(user2);
 
+        //find all
+        List<UserEntity> users = ud.findAllUser();
+
+        users.forEach(System.out::println);
 
         System.out.println(user2);
-
-
     }
 }
