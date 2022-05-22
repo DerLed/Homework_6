@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class UserDaoImpl implements UserDao{
+public class UserDaoImpl implements UserDao {
 
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/hmwk6";
 
@@ -121,35 +121,43 @@ public class UserDaoImpl implements UserDao{
         });
     }
 
-    public void saveUser(UserEntity user){
-        try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
-            conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS);
-            psa.setString(1, user.getName());
-            psa.setString(2, user.getEmail());
-            psa.execute();
-            conn.commit();
-        } catch (Exception throwables) {
-            throwables.printStackTrace();
-        }
+    public boolean saveUser(UserEntity user) {
+        return this.query(conn -> {
+            try {
+                conn.setAutoCommit(false);
+                PreparedStatement psa = conn.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS);
+                psa.setString(1, user.getName());
+                psa.setString(2, user.getEmail());
+                psa.execute();
+                conn.commit();
+                return true;
+            } catch (Exception throwables) {
+                throwables.printStackTrace();
+            }
+            return false;
+        });
     }
 
-    public void updateUser(UserEntity user){
-        try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
-            conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(UPDATE, Statement.RETURN_GENERATED_KEYS);
-            psa.setString(1, user.getName());
-            psa.setString(2, user.getEmail());
-            psa.setLong(3, user.getId());
-            psa.execute();
-            conn.commit();
-        } catch (Exception throwables) {
-            throwables.printStackTrace();
-        }
+    public boolean updateUser(UserEntity user) {
+        return this.query(conn -> {
+            try {
+                conn.setAutoCommit(false);
+                PreparedStatement psa = conn.prepareStatement(UPDATE, Statement.RETURN_GENERATED_KEYS);
+                psa.setString(1, user.getName());
+                psa.setString(2, user.getEmail());
+                psa.setLong(3, user.getId());
+                psa.execute();
+                conn.commit();
+            } catch (Exception throwables) {
+                throwables.printStackTrace();
+            }
+            return false;
+        });
     }
 
-    public void deleteUser(UserEntity user){
-        try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
+    public boolean deleteUser(UserEntity user) {
+        return this.query(conn -> {
+            try {
             conn.setAutoCommit(false);
             PreparedStatement psa = conn.prepareStatement(DELETE, Statement.RETURN_GENERATED_KEYS);
             psa.setLong(1, user.getId());
@@ -158,9 +166,11 @@ public class UserDaoImpl implements UserDao{
         } catch (Exception throwables) {
             throwables.printStackTrace();
         }
+            return false;
+        });
     }
 
-    public void addTicketToUser(UserEntity user, TicketEntity ticket){
+    public void addTicketToUser(UserEntity user, TicketEntity ticket) {
         try (Connection conn = DriverManager.getConnection(DB_URL, "postgres", "123456")) {
             conn.setAutoCommit(false);
             PreparedStatement psa = conn.prepareStatement(ADD_TICKET_TO_USER, Statement.RETURN_GENERATED_KEYS);
@@ -187,21 +197,19 @@ public class UserDaoImpl implements UserDao{
             ticket.setDate(rst.getTimestamp("time").toLocalDateTime());
             ticket.setMovie(
                     new MovieEntity(rst.getLong("movie_id"),
-                                    rst.getString("movie_title"),
-                                    rst.getString("description"))
-                    );
+                            rst.getString("movie_title"),
+                            rst.getString("description"))
+            );
             ticket.setPlace(
                     new PlaceEntity(rst.getLong("place_id"),
-                                    rst.getInt("place_number"),
-                                    rst.getInt("row_number"),
-                                    rst.getString("hall_title"))
-                    );
+                            rst.getInt("place_number"),
+                            rst.getInt("row_number"),
+                            rst.getString("hall_title"))
+            );
             tickets.add(ticket);
         }
-        //user.setTickets(tickets);
         return tickets;
     }
-
 
 
     private <T> T query(Function<Connection, T> s) {
