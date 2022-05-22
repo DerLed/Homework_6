@@ -40,6 +40,7 @@ public class UserDaoImpl implements UserDao {
     private static final String ADD_TICKET_TO_USER = "INSERT INTO user_ticket (user_id, ticket_id) VALUES(?, ?);";
 
     Properties properties = Property.getProperty().getProperties();
+
     private static UserDaoImpl instance;
 
     private UserDaoImpl() {
