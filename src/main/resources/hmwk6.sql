@@ -62,7 +62,8 @@ create table user_ticket(
 create table vip_user(
 	id integer GENERATED ALWAYS AS identity
 	CONSTRAINT vip_user_pk PRIMARY KEY,
-	user_id integer not null unique constraint user_fk references usr(id)
+	user_id integer not null unique constraint user_fk references usr(id),
+	discount integer not null
 );
 
 INSERT INTO public.hall ("name") VALUES('Зал 1');
