@@ -11,6 +11,10 @@ import java.util.*;
 import java.util.function.Function;
 
 public class UserDaoImpl implements UserDao {
+    Properties properties = Property.getProperty().getProperties();
+    private final String DB_URL = properties.getProperty("DB_URL");
+    private final String DB_USER = properties.getProperty("DB_USER");
+    private final String DB_PASSWORD = properties.getProperty("DB_PASSWORD");
 
     private static final String SELECT_ALL = "SELECT * FROM usr";
     private static final String SELECT_TICKETS = "SELECT t.cost, " +
@@ -39,7 +43,6 @@ public class UserDaoImpl implements UserDao {
     private static final String DELETE = "DELETE FROM usr WHERE id = ?";
     private static final String ADD_TICKET_TO_USER = "INSERT INTO user_ticket (user_id, ticket_id) VALUES(?, ?);";
 
-    Properties properties = Property.getProperty().getProperties();
 
     private static UserDaoImpl instance;
 
@@ -119,43 +122,35 @@ public class UserDaoImpl implements UserDao {
         });
     }
 
-    public boolean saveUser(UserEntity user) {
-        return this.query(conn -> {
-            try {
-                conn.setAutoCommit(false);
-                PreparedStatement psa = conn.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS);
-                psa.setString(1, user.getName());
-                psa.setString(2, user.getEmail());
-                psa.execute();
-                conn.commit();
-                return true;
-            } catch (Exception throwables) {
-                throwables.printStackTrace();
-            }
-            return false;
-        });
+    public void saveUser(UserEntity user) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            conn.setAutoCommit(false);
+            PreparedStatement psa = conn.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS);
+            psa.setString(1, user.getName());
+            psa.setString(2, user.getEmail());
+            psa.execute();
+            conn.commit();
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    public boolean updateUser(UserEntity user) {
-        return this.query(conn -> {
-            try {
-                conn.setAutoCommit(false);
-                PreparedStatement psa = conn.prepareStatement(UPDATE, Statement.RETURN_GENERATED_KEYS);
-                psa.setString(1, user.getName());
-                psa.setString(2, user.getEmail());
-                psa.setLong(3, user.getId());
-                psa.execute();
-                conn.commit();
-            } catch (Exception throwables) {
-                throwables.printStackTrace();
-            }
-            return false;
-        });
+    public void updateUser(UserEntity user) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            conn.setAutoCommit(false);
+            PreparedStatement psa = conn.prepareStatement(UPDATE, Statement.RETURN_GENERATED_KEYS);
+            psa.setString(1, user.getName());
+            psa.setString(2, user.getEmail());
+            psa.setLong(3, user.getId());
+            psa.execute();
+            conn.commit();
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    public boolean deleteUser(UserEntity user) {
-        return this.query(conn -> {
-            try {
+    public void deleteUser(UserEntity user) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
             PreparedStatement psa = conn.prepareStatement(DELETE, Statement.RETURN_GENERATED_KEYS);
             psa.setLong(1, user.getId());
@@ -164,13 +159,10 @@ public class UserDaoImpl implements UserDao {
         } catch (Exception throwables) {
             throwables.printStackTrace();
         }
-            return false;
-        });
     }
 
     public void addTicketToUser(UserEntity user, TicketEntity ticket) {
-        try (Connection conn = DriverManager.getConnection(properties.getProperty("DB_URL"),
-                properties.getProperty("DB_USER"), properties.getProperty("DB_PASSWORD"))) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
             PreparedStatement psa = conn.prepareStatement(ADD_TICKET_TO_USER, Statement.RETURN_GENERATED_KEYS);
             psa.setLong(1, user.getId());
@@ -181,7 +173,6 @@ public class UserDaoImpl implements UserDao {
             throwables.printStackTrace();
         }
     }
-
 
     private List<TicketEntity> selectTickets(Connection conn, UserEntity user) throws SQLException {
         PreparedStatement pst = conn.prepareStatement(SELECT_TICKETS);
@@ -210,10 +201,8 @@ public class UserDaoImpl implements UserDao {
         return tickets;
     }
 
-
     private <T> T query(Function<Connection, T> s) {
-        try (Connection conn = DriverManager.getConnection(properties.getProperty("DB_URL"),
-                properties.getProperty("DB_USER"), properties.getProperty("DB_PASSWORD"))) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             return s.apply(conn);
         } catch (SQLException throwables) {
             throwables.printStackTrace();

@@ -15,11 +15,11 @@ public interface UserDao {
 
     Optional<UserEntity> findUserByName(String name);
 
-    boolean saveUser(UserEntity user);
+    void saveUser(UserEntity user);
 
-    boolean updateUser(UserEntity user);
+    void updateUser(UserEntity user);
 
-    boolean deleteUser(UserEntity user);
+    void deleteUser(UserEntity user);
 
     void addTicketToUser(UserEntity user, TicketEntity ticket);
 }
