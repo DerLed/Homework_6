@@ -125,7 +125,7 @@ public class UserDaoImpl implements UserDao {
     public void saveUser(UserEntity user) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(SAVE_USER, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psa = conn.prepareStatement(SAVE_USER);
             psa.setString(1, user.getName());
             psa.setString(2, user.getEmail());
             psa.execute();
@@ -138,7 +138,7 @@ public class UserDaoImpl implements UserDao {
     public void updateUser(UserEntity user) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(UPDATE, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psa = conn.prepareStatement(UPDATE);
             psa.setString(1, user.getName());
             psa.setString(2, user.getEmail());
             psa.setLong(3, user.getId());
@@ -152,7 +152,7 @@ public class UserDaoImpl implements UserDao {
     public void deleteUser(UserEntity user) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(DELETE, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psa = conn.prepareStatement(DELETE);
             psa.setLong(1, user.getId());
             psa.execute();
             conn.commit();
@@ -164,7 +164,7 @@ public class UserDaoImpl implements UserDao {
     public void addTicketToUser(UserEntity user, TicketEntity ticket) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             conn.setAutoCommit(false);
-            PreparedStatement psa = conn.prepareStatement(ADD_TICKET_TO_USER, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psa = conn.prepareStatement(ADD_TICKET_TO_USER);
             psa.setLong(1, user.getId());
             psa.setLong(2, ticket.getId());
             psa.execute();
